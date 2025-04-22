@@ -9,7 +9,7 @@ export default function Layout(props) {
       </div>
       <button>
         <p>Sign up for free</p>
-        <i class="fa-solid fa-mug-hot"></i>
+        <i className="fa-solid fa-mug-hot"></i>
       </button>
     </header>
   );
@@ -17,7 +17,7 @@ export default function Layout(props) {
   const footer = (
     <footer>
       <p>
-        <span className="text-gradient">Caffiend</span> was made by {" "}
+        <span className="text-gradient">Caffiend</span> was made by{" "}
         <a href="http://www.github.com/ilmanmdifa" target="_blank">
           ilmanmdifa
         </a>{" "}
