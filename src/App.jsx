@@ -4,7 +4,7 @@ import History from "./components/History";
 import Layout from "./components/Layout";
 import Stats from "./components/Stats";
 
-const isAuthenticated = false;
+const isAuthenticated = true;
 
 const authenticated = (
   <>
