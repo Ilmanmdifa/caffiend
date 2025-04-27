@@ -1,17 +1,81 @@
 import { useState } from "react";
 import { coffeeOptions } from "../utils/index.js";
-export default function CoffeeForm() {
+import Modal from "./Modal.jsx";
+import Authentication from "./Authentication.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../../firebase.js";
+export default function CoffeeForm(props) {
+  const { isAuthenticated } = props;
+  const [showModal, setShowModal] = useState(false);
   const [selectedCoffee, setSelectedCoffee] = useState(null);
   const [showCoffeeTypes, setShowCoffeeTypes] = useState(false);
   const [coffeeCost, setCoffeeCost] = useState(0);
   const [hour, setHour] = useState(0);
   const [min, setMin] = useState(0);
 
-  const onSubmitHandler = () => {
-    console.log(selectedCoffee, coffeeCost, hour, min);
-  };
+  const { globalData, setGlobalData, globalUser } = useAuth();
+
+  async function handleSubmitForm() {
+    if (!isAuthenticated) {
+      setShowModal(true);
+      return;
+    }
+    //define a guard clause that only submits the form if it is completed
+    if (!selectedCoffee) {
+      return;
+    }
+
+    try {
+      //then we're going to create a new data object
+      const newGlobalData = {
+        ...(globalData || {}),
+      };
+
+      const nowTime = Date.now();
+      const timeToSubstract = hour * 60 * 60 * 1000 + min * 60 * 100;
+      const timestamp = nowTime - timeToSubstract;
+
+      const newData = {
+        name: selectedCoffee,
+        cost: coffeeCost,
+      };
+      newGlobalData[timestamp] = newData;
+      console.log(timestamp, selectedCoffee, coffeeCost);
+
+      //update the global state
+      setGlobalData(newGlobalData);
+
+      //persist the data in the firebase firestore
+      const userRef = doc(db, "users", globalUser.uid);
+      const res = await setDoc(
+        userRef,
+        {
+          [timestamp]: newData,
+        },
+        { merge: true }
+      );
+
+      setCoffeeCost(null);
+      setHour(0);
+      setMin(0);
+      setCoffeeCost(0);
+    } catch (err) {
+      console.log(err.message);
+    }
+  }
+
+  function handleCloseModal() {
+    setShowModal(false);
+  }
+
   return (
     <>
+      {showModal && (
+        <Modal handleCloseModal={handleCloseModal}>
+          <Authentication handleCloseModal={handleCloseModal} />
+        </Modal>
+      )}
       <div className="section-header">
         <i className="fa-solid fa-pencil" />
         <h2>Start Tracking Today</h2>
@@ -109,7 +173,7 @@ export default function CoffeeForm() {
           </select>
         </div>
       </div>
-      <button onClick={onSubmitHandler}>
+      <button onClick={handleSubmitForm}>
         <p>Add entry</p>
       </button>
     </>
