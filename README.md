@@ -1,12 +1,44 @@
-# React + Vite
+# Caffiend ☕  
+Track your coffee consumption, measure your caffeine levels, and manage your coffee habits with ease.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Demo  
+Check out the live demo of Caffiend: [Caffiend Demo](https://caffiend-kopi-tracker.vercel.app/)
 
-Currently, two official plugins are available:
+## Features  
+- **Coffee Tracking**: Log your coffee consumption with details like type, cost, and time.  
+- **Caffeine Level Monitoring**: Calculate your current caffeine levels based on half-life.  
+- **Statistics**: View daily caffeine intake, average coffee consumption, and total cost.  
+- **History**: Review your coffee consumption history with detailed timestamps.  
+- **Authentication**: Sign up, log in, and manage your data securely with Firebase.  
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Installation  
+1. Clone the repository:  
+   ```bash
+   git clone https://github.com/your-username/caffiend.git
+   cd caffiend
+2. Install dependencies:
+   ```bash
+   npm install
+3. Set up firebase:
+   Create a .env file in the root directory and add your Firebase configuration:
+   ```bash
+   VITE_FIREBASE_APIKEY=your-api-key
+   VITE_FIREBASE_AUTHDOMAIN=your-auth-domain
+   VITE_FIREBASE_PROJECTID=your-project-id
+   VITE_FIREBASE_STORAGEBUCKET=your-storage-bucket
+   VITE_FIREBASE_MESSAGINGSENDERID=your-messaging-sender-id
+   VITE_FIREBASE_APPID=your-app-id
+4. Start the development server:
+   ```bash
+   npm run dev
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Usage
+1. Open the app in your browser at http://localhost:5173.
+2. Sign up or log in to start tracking your coffee consumption.
+3. Add coffee entries, view statistics, and monitor your caffeine levels.
+## Technologies Used
+* Frontend: React, Vite
+* State Management: React Context API
+* Authentication & Database: Firebase Authentication, Firestore
+* Styling: CSS, FantaCSS
+* Icons: Font Awesome
