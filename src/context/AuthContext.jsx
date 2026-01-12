@@ -18,7 +18,7 @@ export function useAuth() {
 export function AuthProvider(props) {
   const { children } = props;
   const [globalUser, setGlobalUser] = useState(null);
-  const [globalData, setGlobalData] = useState(null);
+  const [globalData, setGlobalData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
   function signup(email, password) {
@@ -35,7 +35,7 @@ export function AuthProvider(props) {
 
   function logout() {
     setGlobalUser(null);
-    setGlobalData(null);
+    setGlobalData({});
     return signOut(auth);
   }
 
@@ -55,6 +55,7 @@ export function AuthProvider(props) {
       console.log("current user: ", user);
       setGlobalUser(user);
       if (!user) {
+        setGlobalData({})
         console.log("No active user");
         return;
       }
@@ -68,10 +69,10 @@ export function AuthProvider(props) {
 
         let firebaseData = {};
         if (docSnap.exists()) {
-          console.log("Found user data", firebaseData);
           firebaseData = docSnap.data();
+          console.log("Found user data", firebaseData);
         }
-        setGlobalData(firebaseData);
+        setGlobalData(firebaseData || {});
       } catch (error) {
         console.log(error.message);
       } finally {

@@ -33,12 +33,14 @@ export default function CoffeeForm(props) {
       };
 
       const nowTime = Date.now();
-      const timeToSubstract = hour * 60 * 60 * 1000 + min * 60 * 100;
-      const timestamp = nowTime - timeToSubstract;
+      const h= parseInt(hour, 10) ||0
+      const m= parseInt(min, 10) ||0
+      const timeToSubtract= h*60*60*1000 + m*60*1000
+      const timestamp = nowTime - timeToSubtract;
 
       const newData = {
         name: selectedCoffee,
-        cost: coffeeCost,
+        cost: parseFloat(coffeeCost) || 0,
       };
       newGlobalData[timestamp] = newData;
       console.log(timestamp, selectedCoffee, coffeeCost);
@@ -56,10 +58,12 @@ export default function CoffeeForm(props) {
         { merge: true }
       );
 
-      setCoffeeCost(null);
+      setSelectedCoffee(null);
+      setShowCoffeeTypes(false);
+      setCoffeeCost(0);
       setHour(0);
       setMin(0);
-      setCoffeeCost(0);
+      return res
     } catch (err) {
       console.log(err.message);
     }

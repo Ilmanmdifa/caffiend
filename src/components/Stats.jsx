@@ -2,7 +2,6 @@ import { useAuth } from "../context/AuthContext";
 import {
   calculateCoffeeStats,
   calculateCurrentCaffeineLevel,
-  coffeeConsumptionHistory,
   getTopThreeCoffees,
   statusLevels,
 } from "../utils";
@@ -18,9 +17,9 @@ function StatCard(props) {
 }
 export default function Stats() {
   const { globalData } = useAuth();
-  const stats = calculateCoffeeStats(globalData);
 
-  const caffeineLevel = calculateCurrentCaffeineLevel(globalData);
+  const caffeineLevel = Number(calculateCurrentCaffeineLevel(globalData || {}));
+  const stats = calculateCoffeeStats(globalData||{});
   const warningLevel =
     caffeineLevel < statusLevels["low"].maxLevel
       ? "low"
