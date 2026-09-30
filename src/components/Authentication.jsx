@@ -8,8 +8,9 @@ export default function Authentication(props) {
   const [password, setPassword] = useState("");
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [error, setError] = useState(null);
+  const [resetSent, setResetSent] = useState(false);
 
-  const { signup, login } = useAuth();
+  const { signup, login, resetPassword } = useAuth();
 
   async function handleAuthenticate() {
     if (!email || !email.includes("@") || !password || password.length < 6) {
@@ -58,6 +59,27 @@ export default function Authentication(props) {
       <button onClick={handleAuthenticate}>
         <p>{isAuthenticating ? "Authenticating..." : "Submit"}</p>
       </button>
+      {!isRegistration && (
+        <button
+          onClick={async () => {
+            setError(null);
+            setResetSent(false);
+            if (!email || !email.includes("@")) {
+              setError("Enter your email first.");
+              return;
+            }
+            try {
+              await resetPassword(email);
+              setResetSent(true);
+            } catch (err) {
+              setError(err.message);
+            }
+          }}
+        >
+          <p>Forgot password?</p>
+        </button>
+      )}
+      {resetSent && <p>✅ Reset link sent if the email exists.</p>}
       <hr />
       <div className="register-content">
         <p>

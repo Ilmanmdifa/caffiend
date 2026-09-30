@@ -40,3 +40,22 @@
 .read-the-docs {
   color: #888;
 }
+
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.skeleton {
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  background: #e5e7eb;
+  border-radius: 0.5rem;
+  color: transparent;
+  pointer-events: none;
+  user-select: none;
+}
