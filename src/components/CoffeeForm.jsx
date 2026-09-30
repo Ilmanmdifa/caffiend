@@ -13,6 +13,8 @@ export default function CoffeeForm(props) {
   const [coffeeCost, setCoffeeCost] = useState(0);
   const [hour, setHour] = useState(0);
   const [min, setMin] = useState(0);
+  const [formError, setFormError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { globalData, setGlobalData, globalUser } = useAuth();
 
@@ -23,34 +25,29 @@ export default function CoffeeForm(props) {
     }
     //define a guard clause that only submits the form if it is completed
     if (!selectedCoffee) {
+      setFormError("Select a coffee first.");
       return;
     }
+    setFormError(null);
+    setIsSubmitting(true);
 
     try {
       //then we're going to create a new data object
-      const newGlobalData = {
-        ...(globalData || {}),
-      };
-
       const nowTime = Date.now();
-      const h= parseInt(hour, 10) ||0
-      const m= parseInt(min, 10) ||0
-      const timeToSubtract= h*60*60*1000 + m*60*1000
+      const h = parseInt(hour, 10) || 0;
+      const m = parseInt(min, 10) || 0;
+      const timeToSubtract = h * 60 * 60 * 1000 + m * 60 * 1000;
       const timestamp = nowTime - timeToSubtract;
 
       const newData = {
         name: selectedCoffee,
         cost: parseFloat(coffeeCost) || 0,
       };
-      newGlobalData[timestamp] = newData;
-      console.log(timestamp, selectedCoffee, coffeeCost);
 
-      //update the global state
-      setGlobalData(newGlobalData);
-
-      //persist the data in the firebase firestore
+      //persist to firestore FIRST, only touch UI state after it succeeds
+      //(previous version updated state before await = phantom data on failure)
       const userRef = doc(db, "users", globalUser.uid);
-      const res = await setDoc(
+      await setDoc(
         userRef,
         {
           [timestamp]: newData,
@@ -58,14 +55,21 @@ export default function CoffeeForm(props) {
         { merge: true }
       );
 
+      //update the global state
+      setGlobalData({
+        ...(globalData || {}),
+        [timestamp]: newData,
+      });
+
       setSelectedCoffee(null);
       setShowCoffeeTypes(false);
       setCoffeeCost(0);
       setHour(0);
       setMin(0);
-      return res
-    } catch (err) {
-      console.log(err.message);
+    } catch {
+      setFormError("Couldn't save. Check your connection and try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -177,9 +181,10 @@ export default function CoffeeForm(props) {
           </select>
         </div>
       </div>
-      <button onClick={handleSubmitForm}>
-        <p>Add entry</p>
+      <button onClick={handleSubmitForm} disabled={isSubmitting}>
+        <p>{isSubmitting ? "Adding..." : "Add entry"}</p>
       </button>
+      {formError && <p>❌ {formError}</p>}
     </>
   );
 }

@@ -47,6 +47,7 @@ export function AuthProvider(props) {
     signup,
     login,
     logout,
+    resetPassword,
   };
 
   useEffect(() => {
