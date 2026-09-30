@@ -111,7 +111,7 @@ export function calculateCoffeeStats(coffeeConsumptionHistory) {
   return {
     daily_caffeine: averageDailyCaffeine,
     daily_cost: averageDailyCost,
-    average_coffees: (totalCoffees / days).toFixed(2),
+    average_coffees: days > 0 ? (totalCoffees / days).toFixed(2) : 0,
     total_cost: totalCost.toFixed(2),
   };
 }
