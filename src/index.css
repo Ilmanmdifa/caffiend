@@ -133,6 +133,12 @@ h2 {
   gap: 1rem;
 }
 
+/* Small confirmation dialogs (delete entry) */
+.modal-compact {
+  min-height: unset;
+  max-width: 420px;
+}
+
 .section-header {
   display: flex;
   align-items: center;
