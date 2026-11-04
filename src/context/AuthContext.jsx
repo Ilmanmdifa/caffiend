@@ -55,11 +55,9 @@ export function AuthProvider(props) {
   useEffect(() => {
     const unsubscribed = onAuthStateChanged(auth, async (user) => {
       //if theres no user, empty the user state and return from this listener
-      console.log("current user: ", user);
       setGlobalUser(user);
       if (!user) {
-        setGlobalData({})
-        console.log("No active user");
+        setGlobalData({});
         return;
       }
       //if there is a user, then check if the user has data in the database, and if they do, then fetch said data and update the global state
@@ -74,7 +72,6 @@ export function AuthProvider(props) {
         let firebaseData = {};
         if (docSnap.exists()) {
           firebaseData = docSnap.data();
-          console.log("Found user data", firebaseData);
         }
         setGlobalData(firebaseData || {});
       } catch {

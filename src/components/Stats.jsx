@@ -78,7 +78,7 @@ export default function Stats() {
             </tr>
           </thead>
           <tbody>
-            {getTopThreeCoffees(globalData).map((coffee, coffeeIndex) => {
+            {getTopThreeCoffees(globalData || {}).map((coffee, coffeeIndex) => {
               return (
                 <tr key={coffeeIndex}>
                   <td>{coffee.coffeeName}</td>
