@@ -15,6 +15,8 @@ export default function History() {
   // confirmation is open. Replaces the browser-blocking window.confirm.
   const [pendingDelete, setPendingDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  // Entry timestamp shown in the details dialog, or null when closed.
+  const [detailEntry, setDetailEntry] = useState(null);
 
   // Remaining caffeine per entry, computed once per data change.
   // Each helper call receives a single-entry object, so this stays O(n).
@@ -52,14 +54,28 @@ export default function History() {
       setIsDeleting(false);
     }
   }
+
+  // Values for the entry-details dialog. detailCoffee is null when the
+  // dialog is closed or the entry no longer exists (e.g. deleted from
+  // another tab), which unmounts the dialog instead of showing stale data.
+  const detailCoffee = detailEntry !== null ? globalData[detailEntry] : null;
+  const detailOriginal = detailCoffee ? getCaffeineAmount(detailCoffee.name) : 0;
+  const detailRemaining = detailCoffee
+    ? Number(remainingAmounts[detailEntry] ?? 0)
+    : 0;
+  const detailRemainingPercent =
+    detailOriginal > 0 && detailCoffee
+      ? Math.round((detailRemaining / detailOriginal) * 100)
+      : null;
+
   return (
     <>
       {pendingDelete !== null && (
         <Modal handleCloseModal={() => setPendingDelete(null)} compact>
           <h2>Delete this entry?</h2>
           <p>
-            {globalData[pendingDelete]?.name} |{" "}
-            {timeSinceConsumption(Number(pendingDelete))} lebih | $
+            {globalData[pendingDelete]?.name} | consumed{" "}
+            {timeSinceConsumption(Number(pendingDelete))} ago | $
             {globalData[pendingDelete]?.cost}
           </p>
           <div className="register-container">
@@ -79,12 +95,30 @@ export default function History() {
           </div>
         </Modal>
       )}
+      {(detailCoffee) && (
+        <Modal handleCloseModal={() => setDetailEntry(null)} compact>
+          <h2>{detailCoffee.name}</h2>
+          <p>
+            Consumed {timeSinceConsumption(Number(detailEntry))} ago
+          </p>
+          <p>{new Date(Number(detailEntry)).toLocaleString()}</p>
+          <p>Cost: ${detailCoffee.cost}</p>
+          <p>
+            {detailOriginal > 0
+              ? `Caffeine now: ${remainingAmounts[detailEntry]}mg / ${detailOriginal}mg (${detailRemainingPercent}% left)`
+              : "Caffeine: unknown amount for this coffee."}
+          </p>
+          <button onClick={() => setDetailEntry(null)}>
+            <p>Close</p>
+          </button>
+        </Modal>
+      )}
       <div className="section-header">
         <i className="fa-solid fa-timeline" />
         <h2>History</h2>
       </div>
       <p>
-        <i>Hover for more information!</i>
+        <i>Click a cup icon for details — hover for a quick summary!</i>
       </p>
       <div className="coffee-history">
         {Object.keys(globalData).length === 0 && (
@@ -102,7 +136,13 @@ export default function History() {
 
             return (
               <div title={summary} key={coffeeIndex}>
-                <i className="fa-solid fa-mug-hot"></i>
+                <button
+                  onClick={() => setDetailEntry(utcTime)}
+                  aria-label={`Entry details for ${coffee.name}`}
+                  title={"Entry details"}
+                >
+                  <i className="fa-solid fa-mug-hot"></i>
+                </button>
                 <button
                   onClick={() => handleRequestDelete(utcTime)}
                   aria-label={`Delete ${coffee.name}`}
