@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { deleteField, doc, updateDoc } from "firebase/firestore";
-import { db } from "../../firebase.js";
+import { deleteCoffeeEntry } from "../services/coffee-service.js";
 import {
   calculateCurrentCaffeineLevel,
   getCaffeineAmount,
@@ -34,9 +33,7 @@ export default function History() {
     delete nextData[utcTime];
     setGlobalData(nextData);
     try {
-      await updateDoc(doc(db, "users", globalUser.uid), {
-        [utcTime]: deleteField(),
-      });
+      await deleteCoffeeEntry(globalUser.uid, utcTime);
     } catch {
       setGlobalData(previousData);
       setDeleteError("Couldn't delete. Check your connection and try again.");

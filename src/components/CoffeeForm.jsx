@@ -3,8 +3,7 @@ import { coffeeOptions } from "../utils/index.js";
 import Modal from "./Modal.jsx";
 import Authentication from "./Authentication.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
-import { doc, setDoc } from "firebase/firestore";
-import { db } from "../../firebase.js";
+import { saveCoffeeEntry } from "../services/coffee-service.js";
 export default function CoffeeForm(props) {
   const { isAuthenticated } = props;
   const [showModal, setShowModal] = useState(false);
@@ -48,14 +47,7 @@ export default function CoffeeForm(props) {
 
       //persist to firestore FIRST, only touch UI state after it succeeds
       //(previous version updated state before await = phantom data on failure)
-      const userRef = doc(db, "users", globalUser.uid);
-      await setDoc(
-        userRef,
-        {
-          [timestamp]: newData,
-        },
-        { merge: true }
-      );
+      await saveCoffeeEntry(globalUser.uid, timestamp, newData);
 
       //update the global state
       setGlobalData({
