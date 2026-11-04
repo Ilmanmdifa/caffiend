@@ -1,6 +1,33 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
+// Map Firebase auth error codes to short, user-friendly messages.
+// Uniform "Incorrect email or password." wording avoids revealing
+// whether an email exists (email enumeration).
+const AUTH_ERROR_MESSAGES = {
+  "auth/email-already-in-use": "That email is already registered. Try logging in.",
+  "auth/invalid-credential": "Incorrect email or password.",
+  "auth/wrong-password": "Incorrect email or password.",
+  "auth/user-not-found": "Incorrect email or password.",
+  "auth/too-many-requests": "Too many attempts. Please try again in a moment.",
+  "auth/weak-password": "Password must be at least 6 characters.",
+  "auth/network-request-failed": "Couldn't reach the server. Check your connection.",
+  "auth/invalid-email": "Enter a valid email address.",
+};
+
+function getAuthErrorMessage(err) {
+  return AUTH_ERROR_MESSAGES[err?.code] ?? "Something went wrong. Please try again.";
+}
+
+// Client-side guard. Returns an error message, or null when valid.
+function validateCredentials(email, password) {
+  if (!email) return "Enter your email first.";
+  if (!email.includes("@")) return "Enter a valid email address.";
+  if (!password) return "Enter your password.";
+  if (password.length < 6) return "Password must be at least 6 characters.";
+  return null;
+}
+
 export default function Authentication(props) {
   const { handleCloseModal } = props;
   const [isRegistration, setIsRegistration] = useState(false);
@@ -13,7 +40,9 @@ export default function Authentication(props) {
   const { signup, login, resetPassword } = useAuth();
 
   async function handleAuthenticate() {
-    if (!email || !email.includes("@") || !password || password.length < 6) {
+    const validationError = validateCredentials(email, password);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -27,8 +56,7 @@ export default function Authentication(props) {
       }
       handleCloseModal();
     } catch (err) {
-      console.log(err.message);
-      setError(err.message);
+      setError(getAuthErrorMessage(err));
     } finally {
       setIsAuthenticating(false);
     }
@@ -64,8 +92,12 @@ export default function Authentication(props) {
           onClick={async () => {
             setError(null);
             setResetSent(false);
-            if (!email || !email.includes("@")) {
+            if (!email) {
               setError("Enter your email first.");
+              return;
+            }
+            if (!email.includes("@")) {
+              setError("Enter a valid email address.");
               return;
             }
             try {
