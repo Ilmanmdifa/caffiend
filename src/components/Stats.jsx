@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
 import {
   calculateCoffeeStats,
@@ -18,8 +19,18 @@ function StatCard(props) {
 export default function Stats() {
   const { globalData } = useAuth();
 
-  const caffeineLevel = Number(calculateCurrentCaffeineLevel(globalData || {}));
-  const stats = calculateCoffeeStats(globalData||{});
+  // Stable empty object so useMemo deps don't churn on every render.
+  const data = useMemo(() => globalData || {}, [globalData]);
+
+  // Stats are only recomputed when the underlying data changes,
+  // not on every re-render.
+  const caffeineLevel = useMemo(
+    () => Number(calculateCurrentCaffeineLevel(data)),
+    [data]
+  );
+  const stats = useMemo(() => calculateCoffeeStats(data), [data]);
+  const topCoffees = useMemo(() => getTopThreeCoffees(data), [data]);
+
   const warningLevel =
     caffeineLevel < statusLevels["low"].maxLevel
       ? "low"
@@ -78,7 +89,7 @@ export default function Stats() {
             </tr>
           </thead>
           <tbody>
-            {getTopThreeCoffees(globalData || {}).map((coffee, coffeeIndex) => {
+            {topCoffees.map((coffee, coffeeIndex) => {
               return (
                 <tr key={coffeeIndex}>
                   <td>{coffee.coffeeName}</td>

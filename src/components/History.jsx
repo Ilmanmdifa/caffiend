@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { deleteField, doc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase.js";
@@ -11,6 +11,17 @@ import {
 export default function History() {
   const { globalData, setGlobalData, globalUser } = useAuth();
   const [deleteError, setDeleteError] = useState(null);
+
+  // Remaining caffeine per entry, computed once per data change.
+  // Each helper call receives a single-entry object, so this stays O(n).
+  const remainingAmounts = useMemo(() => {
+    return Object.fromEntries(
+      Object.entries(globalData || {}).map(([utcTime, coffee]) => [
+        utcTime,
+        calculateCurrentCaffeineLevel({ [utcTime]: coffee }),
+      ])
+    );
+  }, [globalData]);
 
   async function handleDelete(utcTime) {
     if (!window.confirm("Delete this entry?")) {
@@ -50,9 +61,7 @@ export default function History() {
             const coffee = globalData[utcTime];
             const timeSinceConsume = timeSinceConsumption(utcTime);
             const originalAmount = getCaffeineAmount(coffee.name);
-            const remainingAmount = calculateCurrentCaffeineLevel({
-              [utcTime]: coffee,
-            });
+            const remainingAmount = remainingAmounts[utcTime];
 
             const summary = `${coffee.name} | ${timeSinceConsume} | $${coffee.cost} | ${remainingAmount}mg / ${originalAmount}mg`;
 
