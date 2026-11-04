@@ -10,7 +10,9 @@ export default function CoffeeForm(props) {
   const [showModal, setShowModal] = useState(false);
   const [selectedCoffee, setSelectedCoffee] = useState(null);
   const [showCoffeeTypes, setShowCoffeeTypes] = useState(false);
-  const [coffeeCost, setCoffeeCost] = useState(0);
+  // Empty string (not 0) so the placeholder hint stays visible and
+  // users don't have to delete a leftover "0" before typing.
+  const [coffeeCost, setCoffeeCost] = useState("");
   const [hour, setHour] = useState(0);
   const [min, setMin] = useState(0);
   const [formError, setFormError] = useState(null);
@@ -63,7 +65,7 @@ export default function CoffeeForm(props) {
 
       setSelectedCoffee(null);
       setShowCoffeeTypes(false);
-      setCoffeeCost(0);
+      setCoffeeCost("");
       setHour(0);
       setMin(0);
     } catch {
@@ -150,6 +152,8 @@ export default function CoffeeForm(props) {
         onChange={(e) => {
           setCoffeeCost(e.target.value);
         }}
+        min="0"
+        step="0.01"
       />
       <h4>Time since consumption</h4>
       <div className="time-entry">
