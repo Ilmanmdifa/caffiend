@@ -20,11 +20,15 @@ function getAuthErrorMessage(err) {
 }
 
 // Client-side guard. Returns an error message, or null when valid.
-function validateCredentials(email, password) {
+// confirmPassword is only checked on signup (pass null on login).
+function validateCredentials(email, password, confirmPassword = null) {
   if (!email) return "Enter your email first.";
   if (!email.includes("@")) return "Enter a valid email address.";
   if (!password) return "Enter your password.";
   if (password.length < 6) return "Password must be at least 6 characters.";
+  if (confirmPassword !== null && password !== confirmPassword) {
+    return "Passwords don't match.";
+  }
   return null;
 }
 
@@ -33,6 +37,8 @@ export default function Authentication(props) {
   const [isRegistration, setIsRegistration] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [error, setError] = useState(null);
   const [resetSent, setResetSent] = useState(false);
@@ -40,7 +46,11 @@ export default function Authentication(props) {
   const { signup, login, resetPassword } = useAuth();
 
   async function handleAuthenticate() {
-    const validationError = validateCredentials(email, password);
+    const validationError = validateCredentials(
+      email,
+      password,
+      isRegistration ? confirmPassword : null
+    );
     if (validationError) {
       setError(validationError);
       return;
@@ -81,9 +91,30 @@ export default function Authentication(props) {
         onChange={(e) => {
           setPassword(e.target.value);
         }}
-        type="password"
+        type={showPassword ? "text" : "password"}
         placeholder="********"
       />
+      {isRegistration && (
+        <input
+          value={confirmPassword}
+          onChange={(e) => {
+            setConfirmPassword(e.target.value);
+          }}
+          type={showPassword ? "text" : "password"}
+          placeholder="Confirm password"
+        />
+      )}
+      <button
+        type="button"
+        onClick={() => {
+          setShowPassword(!showPassword);
+        }}
+        aria-label={showPassword ? "Hide password" : "Show password"}
+      >
+        <p>
+          <i className={showPassword ? "fa-solid fa-eye-slash" : "fa-solid fa-eye"} />
+        </p>
+      </button>
       <button onClick={handleAuthenticate}>
         <p>{isAuthenticating ? "Authenticating..." : "Submit"}</p>
       </button>
@@ -104,7 +135,7 @@ export default function Authentication(props) {
               await resetPassword(email);
               setResetSent(true);
             } catch (err) {
-              setError(err.message);
+              setError(getAuthErrorMessage(err));
             }
           }}
         >
@@ -122,6 +153,7 @@ export default function Authentication(props) {
         <button
           onClick={() => {
             setIsRegistration(!isRegistration);
+            setConfirmPassword("");
           }}
         >
           <p>{isRegistration ? "Sign in" : "Sign up"}</p>
