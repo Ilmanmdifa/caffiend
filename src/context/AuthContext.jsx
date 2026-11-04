@@ -7,7 +7,7 @@ import {
 } from "firebase/auth";
 import { auth, db } from "../../firebase";
 import { createContext, useContext, useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 
 const AuthContext = createContext();
 
@@ -53,34 +53,54 @@ export function AuthProvider(props) {
   };
 
   useEffect(() => {
-    const unsubscribed = onAuthStateChanged(auth, async (user) => {
-      //if theres no user, empty the user state and return from this listener
+    // Track the data listener so we can detach it whenever the auth
+    // state changes (logout, or a different user signing in).
+    let unsubscribeData = null;
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      // Detach any previous data listener before switching users.
+      if (unsubscribeData) {
+        unsubscribeData();
+        unsubscribeData = null;
+      }
+
       setGlobalUser(user);
       if (!user) {
         setGlobalData({});
+        setIsLoading(false);
         return;
       }
-      //if there is a user, then check if the user has data in the database, and if they do, then fetch said data and update the global state
-      try {
-        setIsLoading(true);
-        setLoadError(null);
 
-        //first we create a reference for the document (labelled json object), and then we get the doc, and then we snapshot it to see if there's anything there
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
+      setIsLoading(true);
+      setLoadError(null);
 
-        let firebaseData = {};
-        if (docSnap.exists()) {
-          firebaseData = docSnap.data();
+      // Subscribe to live updates on the user's document. Writes from any
+      // tab or device now flow back into the app automatically, and local
+      // optimistic changes are confirmed or corrected by the server.
+      const docRef = doc(db, "users", user.uid);
+      unsubscribeData = onSnapshot(
+        docRef,
+        (docSnap) => {
+          let firebaseData = {};
+          if (docSnap.exists()) {
+            firebaseData = docSnap.data();
+          }
+          setGlobalData(firebaseData || {});
+          setIsLoading(false);
+        },
+        () => {
+          setIsLoading(false);
+          setLoadError("Couldn't load your data. Check your connection and retry.");
         }
-        setGlobalData(firebaseData || {});
-      } catch {
-        setLoadError("Couldn't load your data. Check your connection and retry.");
-      } finally {
-        setIsLoading(false);
-      }
+      );
     });
-    return unsubscribed;
+
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeData) {
+        unsubscribeData();
+      }
+    };
   }, []);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
