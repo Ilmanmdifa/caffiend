@@ -86,14 +86,28 @@ export default function Authentication(props) {
         type="email"
         placeholder="email"
       />
-      <input
-        value={password}
-        onChange={(e) => {
-          setPassword(e.target.value);
-        }}
-        type={showPassword ? "text" : "password"}
-        placeholder="********"
-      />
+      <div className="password-entry">
+        <input
+          value={password}
+          onChange={(e) => {
+            setPassword(e.target.value);
+          }}
+          type={showPassword ? "text" : "password"}
+          placeholder="********"
+        />
+        <button
+          type="button"
+          onClick={() => {
+            setShowPassword(!showPassword);
+          }}
+          aria-label={showPassword ? "Hide password" : "Show password"}
+          className="show-password"
+        >
+          <p>
+            <i className={showPassword ? "fa-solid fa-eye-slash" : "fa-solid fa-eye"} />
+          </p>
+        </button>
+      </div>
       {isRegistration && (
         <input
           value={confirmPassword}
@@ -104,17 +118,6 @@ export default function Authentication(props) {
           placeholder="Confirm password"
         />
       )}
-      <button
-        type="button"
-        onClick={() => {
-          setShowPassword(!showPassword);
-        }}
-        aria-label={showPassword ? "Hide password" : "Show password"}
-      >
-        <p>
-          <i className={showPassword ? "fa-solid fa-eye-slash" : "fa-solid fa-eye"} />
-        </p>
-      </button>
       <button onClick={handleAuthenticate}>
         <p>{isAuthenticating ? "Authenticating..." : "Submit"}</p>
       </button>

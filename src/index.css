@@ -254,6 +254,45 @@ footer {
   gap: 1rem;
 }
 
+/* Password field with an eye toggle inside the input */
+.password-entry {
+  position: relative;
+  width: 100%;
+}
+
+.password-entry input {
+  padding-right: 2.6rem;
+}
+
+.password-entry button.show-password,
+.password-entry button.show-password:hover {
+  position: absolute;
+  top: 50%;
+  right: 0.35rem;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.1rem 0.35rem;
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: var(--border-secondary);
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.password-entry button.show-password:hover {
+  color: var(--color-primary);
+  transform: translateY(-50%);
+  border-radius: var(--border-radius-small);
+}
+
+.password-entry button.show-password p {
+  margin: 0;
+}
+
 @media (min-width: 640px) {
   main h1 {
     padding-top: 2.5rem;
