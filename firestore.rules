@@ -6,15 +6,23 @@ rules_version = '2';
 // are fields inside that document, so scoping rules to the document is
 // enough: a signed-in user may only read and write their own document.
 //
+// The deny-all catch-all keeps anything not explicitly allowed closed
+// (defense in depth). If a new collection is added later, it stays closed
+// until someone writes an explicit match block for it.
+//
 // How to apply:
 //   1. Firebase Console -> Firestore Database -> Rules -> paste this file.
 //   2. Or, once you add firebase.json config to this repo:
 //      npx firebase deploy --only firestore:rules
-//
-// Never leave the database in "test mode" (allow read, write: if true).
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Deny everything not explicitly allowed below.
+    match /{documents=**} {
+      allow read, write: if false;
+    }
+
+    // Users may only access their own document.
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
