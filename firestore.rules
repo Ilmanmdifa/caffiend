@@ -1,0 +1,22 @@
+rules_version = '2';
+
+// Caffiend Firestore security rules.
+//
+// Data model: one document per user (users/{userId}). All coffee entries
+// are fields inside that document, so scoping rules to the document is
+// enough: a signed-in user may only read and write their own document.
+//
+// How to apply:
+//   1. Firebase Console -> Firestore Database -> Rules -> paste this file.
+//   2. Or, once you add firebase.json config to this repo:
+//      npx firebase deploy --only firestore:rules
+//
+// Never leave the database in "test mode" (allow read, write: if true).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
