@@ -39,6 +39,7 @@ export default function Authentication(props) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [error, setError] = useState(null);
   const [resetSent, setResetSent] = useState(false);
@@ -109,14 +110,28 @@ export default function Authentication(props) {
         </button>
       </div>
       {isRegistration && (
-        <input
-          value={confirmPassword}
-          onChange={(e) => {
-            setConfirmPassword(e.target.value);
-          }}
-          type={showPassword ? "text" : "password"}
-          placeholder="Confirm password"
-        />
+        <div className="password-entry">
+          <input
+            value={confirmPassword}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+            }}
+            type={showConfirmPassword ? "text" : "password"}
+            placeholder="Confirm password"
+          />
+          <button
+            type="button"
+            onClick={() => {
+              setShowConfirmPassword(!showConfirmPassword);
+            }}
+            aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+            className="show-password"
+          >
+            <p>
+              <i className={showConfirmPassword ? "fa-solid fa-eye-slash" : "fa-solid fa-eye"} />
+            </p>
+          </button>
+        </div>
       )}
       <button onClick={handleAuthenticate}>
         <p>{isAuthenticating ? "Authenticating..." : "Submit"}</p>
